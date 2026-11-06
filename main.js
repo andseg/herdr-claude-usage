@@ -26,8 +26,10 @@ export default class ClaudeUsage extends View {
     });
   }
 
-  bar(t, label, used, allowed, warn, text) {
-    const pct = Math.max(0, Math.min(100, used));
+  bar(t, label, used, allowed, warn, text, ofAllowed = false) {
+    // ofAllowed: a barra vai de 0 ao limite (allowed), nao de 0 a 100%.
+    const base = ofAllowed && allowed > 0 ? used / allowed * 100 : used;
+    const pct = Math.max(0, Math.min(100, base));
     const fill = warn ? t.blocked : t.working;
     return h_flex().gap(6).items_center()
       .child(div().text_color(t.muted).child(label))
@@ -55,8 +57,8 @@ export default class ClaudeUsage extends View {
       // 5h: medidor de 0 a 100% da sessao atual, sem aviso; mostra o que ainda resta.
       .when(Boolean(five), el => el.child(this.bar(t, "5h", five.used, 100, false,
         `${Math.round(five.used)}% / 100% · resta ${Math.max(0, Math.round(100 - five.used))}%`)))
-      .when(Boolean(day), el => el.child(this.bar(t, "hoje", day.used, day.allowed, day.warn)))
-      .child(this.bar(t, `semana ${week.index}/${week.slices}`, week.used, week.allowed, week.warn))
+      .when(Boolean(day), el => el.child(this.bar(t, "hoje", day.used, day.allowed, day.warn, undefined, true)))
+      .child(this.bar(t, `semana ${week.index}/${week.slices}`, week.used, week.allowed, week.warn, undefined, true))
       .when(Boolean(names), el => el.child(div().text_color(t.blocked).child(`AVISO: ${names}`)));
   }
 }
